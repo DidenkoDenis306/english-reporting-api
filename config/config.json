@@ -1,0 +1,24 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "123",
+    "database": "english-reporting",
+    "host": "localhost",
+    "dialect": "postgres",
+    "port": 5433
+  },
+  "test": {
+    "username": "postgres",
+    "password": "123",
+    "database": "english-reporting",
+    "host": "localhost",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "123",
+    "database": "english-reporting",
+    "host": "localhost",
+    "dialect": "postgres"
+  }
+}
