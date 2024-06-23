@@ -1,33 +1,81 @@
-import { Injectable } from '@nestjs/common';
-import { Student } from './students.model';
-import { InjectModel } from '@nestjs/sequelize';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Cache } from 'cache-manager';
+import { PrismaService } from '../prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
-import { Lesson } from '../lessons/lessons.model';
 
 @Injectable()
 export class StudentsService {
   constructor(
-    @InjectModel(Student) private studentRepository: typeof Student,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private prisma: PrismaService,
   ) {}
+
   async createStudent(dto: CreateStudentDto) {
-    return await this.studentRepository.create(dto);
+    const student = await this.prisma.student.create({
+      data: dto,
+    });
+
+    await this.cacheManager.del('all-students');
+    await this.cacheManager.set(`student-${student.id}`, student, 600);
+
+    return student;
   }
 
   async getAllStudents() {
-    return await this.studentRepository.findAll();
+    const cachedStudents = await this.cacheManager.get('all-students');
+
+    if (cachedStudents) {
+      return cachedStudents;
+    }
+
+    console.log('work');
+
+    const students = await this.prisma.student.findMany();
+    await this.cacheManager.set('all-students', students, 600);
+
+    return students;
   }
 
   async getStudent(studentId: number) {
-    return await this.studentRepository.findByPk(studentId, {
-      include: [Lesson],
+    const cachedStudent = await this.cacheManager.get(`student-${studentId}`);
+
+    if (cachedStudent) {
+      return cachedStudent;
+    }
+
+    const student = await this.prisma.student.findUnique({
+      where: { id: Number(studentId) },
+      include: { lessons: true },
     });
+
+    if (!student) {
+      throw new NotFoundException('Student doesnt exist');
+    }
+
+    if (!student.lessons) {
+      student.lessons = [];
+    }
+
+    await this.cacheManager.set(`student-${studentId}`, student, 600);
+
+    return student;
   }
 
   async deleteStudent(studentId: number) {
-    const student = await this.studentRepository.findByPk(studentId);
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+    });
 
-    await student.destroy();
+    if (student) {
+      await this.prisma.student.delete({
+        where: { id: studentId },
+      });
+      await this.cacheManager.del(`student-${studentId}`);
 
-    return studentId;
+      return studentId;
+    }
+
+    return null;
   }
 }

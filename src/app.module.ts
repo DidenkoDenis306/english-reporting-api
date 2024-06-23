@@ -1,33 +1,33 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
-import { SequelizeModule } from '@nestjs/sequelize';
-import { StudentsModule } from './students/students.module';
 import { ConfigModule } from '@nestjs/config';
+import * as redisStore from 'cache-manager-redis-store';
 import * as process from 'process';
-import { Student } from './students/students.model';
-import { LessonsService } from './lessons/lessons.service';
 import { LessonsController } from './lessons/lessons.controller';
 import { LessonsModule } from './lessons/lessons.module';
-import { Lesson } from './lessons/lessons.model';
+import { LessonsService } from './lessons/lessons.service';
+import { PrismaService } from './prisma.service';
+import { StudentsModule } from './students/students.module';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
-    SequelizeModule.forRoot({
-      dialect: 'postgres',
-      host: process.env.POSTGRES_HOST,
-      port: Number(process.env.POSTGRES_PORT),
-      username: process.env.POSTGRES_USER,
-      password: process.env.POSTGRES_PASSWORD,
-      database: process.env.POSTGRES_DB,
-      models: [Student, Lesson],
-      autoLoadModels: true,
+    CacheModule.register({
+      isGlobal: true,
+      store: redisStore,
+      host: 'localhost',
+      port: 6379,
     }),
     StudentsModule,
     LessonsModule,
+    UsersModule,
+    AuthModule,
   ],
-  controllers: [LessonsController],
-  providers: [LessonsService],
+  controllers: [],
+  providers: [PrismaService],
 })
 export class AppModule {}

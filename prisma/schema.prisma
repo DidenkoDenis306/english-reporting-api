@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  firstName      String
+  lastName       String?
+  login          String     @unique
+  password       String
+  isSpecial      Boolean?  @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  students     Student[]
+  lessons      Lesson[]
+
+
+  @@map("users")
+}
+
+model Lesson {
+  id           Int       @id @default(autoincrement())
+  lessonDate   DateTime  @db.Timestamptz(6)
+  studentId    Int?
+  teacherId    Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lessonNumber Int
+  students     Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  users        User? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("lessons")
+}
+
+model Student {
+  id             Int       @id @default(autoincrement())
+  firstName      String
+  lastName       String?
+  age            Int?
+  lessonsCount   Int
+  teacherId      Int
+  lastLessonDate DateTime? @db.Timestamptz(6)
+  price          Int
+  currency       String
+  isPrivate      Boolean?  @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lessons       Lesson[]
+  users         User? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@map("students")
+}
