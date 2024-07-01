@@ -113,6 +113,9 @@ export class AuthService {
     return {
       id: user.id,
       login: user.login,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      isSpecial: user.isSpecial,
     };
   }
 }

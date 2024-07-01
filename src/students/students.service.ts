@@ -4,6 +4,12 @@ import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 
+enum Filter {
+  Year = 'year',
+  Month = 'month',
+  Week = 'week',
+}
+
 @Injectable()
 export class StudentsService {
   constructor(
@@ -37,7 +43,7 @@ export class StudentsService {
     return students;
   }
 
-  async getStudent(studentId: number) {
+  async getStudent(studentId: number, filter?: Filter) {
     const cachedStudent = await this.cacheManager.get(`student-${studentId}`);
 
     if (cachedStudent) {
@@ -55,6 +61,13 @@ export class StudentsService {
 
     if (!student.lessons) {
       student.lessons = [];
+    }
+
+    if (filter) {
+      const start = this.startOfPeriod(filter);
+      student.lessons = student.lessons.filter(
+        (lesson) => new Date(lesson.lessonDate) >= start,
+      );
     }
 
     await this.cacheManager.set(`student-${studentId}`, student, 600);
@@ -77,5 +90,22 @@ export class StudentsService {
     }
 
     return null;
+  }
+
+  private startOfPeriod(filter: Filter): Date {
+    const now = new Date();
+    switch (filter) {
+      case Filter.Year:
+        return new Date(now.getFullYear(), 0, 1);
+      case Filter.Month:
+        return new Date(now.getFullYear(), now.getMonth(), 1);
+      case Filter.Week:
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+        startOfWeek.setHours(0, 0, 0, 0);
+        return startOfWeek;
+      default:
+        return new Date();
+    }
   }
 }
