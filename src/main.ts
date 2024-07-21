@@ -3,7 +3,7 @@ import * as process from 'process';
 import { AppModule } from './app.module';
 
 async function start() {
-  const PORT = 7654;
+  const PORT = process.env.PORT || 7654;
 
   const app = await NestFactory.create(AppModule);
 

@@ -4,33 +4,50 @@ services:
   postgres:
     container_name: postgres
     image: postgres:16
-    env_file:
-      - .production.env
     environment:
-      PG_DATA: /var/lib/postgresql/data
+      POSTGRES_DB: english-reporting
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
     ports:
-      - "5432"
+      - "5432:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
     restart: always
+    networks:
+      - app-network
+
+  redis:
+    container_name: redis
+    image: redis:7
+    ports:
+      - "6379"
+    restart: always
+    networks:
+      - app-network
 
   main:
     container_name: main
     build:
       context: .
     env_file:
-      - .production.env
+      - .env
     volumes:
       - .:/app
       - /app/node_modules
     ports:
       - "7654:7654"
       - "9229:9229"
-    command: npm run start:dev
+    command: sh -c "npx prisma db push && npm run start:dev"
     depends_on:
       - postgres
+      - redis
     restart: always
+    networks:
+      - app-network
 
 
 volumes:
   postgres:
+
+networks:
+  app-network:

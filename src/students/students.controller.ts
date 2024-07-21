@@ -1,5 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
+import { Filter } from './enums/filters.enum';
 import { StudentsService } from './students.service';
 
 @Controller('students')
@@ -16,8 +25,8 @@ export class StudentsController {
   }
 
   @Get(':id')
-  getOne(@Param('id') id: number) {
-    return this.studentsService.getStudent(id);
+  getOne(@Param('id') id: number, @Query('filter') filter?: Filter) {
+    return this.studentsService.getStudent(id, filter);
   }
 
   @Delete(':id')
