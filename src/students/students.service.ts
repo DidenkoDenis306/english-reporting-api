@@ -3,12 +3,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma.service';
 import { CreateStudentDto } from './dto/create-student.dto';
-
-enum Filter {
-  Year = 'year',
-  Month = 'month',
-  Week = 'week',
-}
+import { Filter } from './enums/filters.enum';
 
 @Injectable()
 export class StudentsService {
@@ -23,7 +18,11 @@ export class StudentsService {
     });
 
     await this.cacheManager.del('all-students');
-    await this.cacheManager.set(`student-${student.id}`, student, 600);
+    await this.cacheManager.set(
+      `student-${student.id}-no-filter`,
+      student,
+      600,
+    );
 
     return student;
   }
@@ -35,8 +34,6 @@ export class StudentsService {
       return cachedStudents;
     }
 
-    console.log('work');
-
     const students = await this.prisma.student.findMany();
     await this.cacheManager.set('all-students', students, 600);
 
@@ -44,7 +41,8 @@ export class StudentsService {
   }
 
   async getStudent(studentId: number, filter?: Filter) {
-    const cachedStudent = await this.cacheManager.get(`student-${studentId}`);
+    const cacheKey = `student-${studentId}-${filter || 'no-filter'}`;
+    const cachedStudent = await this.cacheManager.get(cacheKey);
 
     if (cachedStudent) {
       return cachedStudent;
@@ -70,7 +68,12 @@ export class StudentsService {
       );
     }
 
-    await this.cacheManager.set(`student-${studentId}`, student, 600);
+    student.lessons.sort(
+      (a, b) =>
+        new Date(a.lessonDate).getTime() - new Date(b.lessonDate).getTime(),
+    );
+
+    await this.cacheManager.set(cacheKey, student, 600);
 
     return student;
   }

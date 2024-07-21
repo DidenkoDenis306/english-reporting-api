@@ -22,7 +22,7 @@ export class LessonsService {
       throw new NotFoundException('Student not found');
     }
 
-    await this.cacheManager.del(`student-${student.id}`);
+    await this.cacheManager.del(`student-${student.id}-no-filter`);
 
     const lessonNumber = student.lessonsCount + 1;
 
