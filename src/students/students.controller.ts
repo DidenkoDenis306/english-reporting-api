@@ -19,9 +19,9 @@ export class StudentsController {
     return this.studentsService.createStudent(studentDto);
   }
 
-  @Get()
-  getAll() {
-    return this.studentsService.getAllStudents();
+  @Get('teacher/:teacherId')
+  getAll(@Param('teacherId') teacherId: number) {
+    return this.studentsService.getAllStudents(teacherId);
   }
 
   @Get(':id')
@@ -31,6 +31,6 @@ export class StudentsController {
 
   @Delete(':id')
   delete(@Param('id') id: number) {
-    return this.studentsService.getStudent(id);
+    return this.studentsService.deleteStudent(id);
   }
 }

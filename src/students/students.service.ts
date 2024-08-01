@@ -17,7 +17,7 @@ export class StudentsService {
       data: dto,
     });
 
-    await this.cacheManager.del('all-students');
+    await this.cacheManager.del(`all-students-${dto.teacherId}`);
     await this.cacheManager.set(
       `student-${student.id}-no-filter`,
       student,
@@ -27,15 +27,21 @@ export class StudentsService {
     return student;
   }
 
-  async getAllStudents() {
-    const cachedStudents = await this.cacheManager.get('all-students');
+  async getAllStudents(teacherId: number) {
+    const cacheKey = `all-students-${teacherId}`;
+    const cachedStudents = await this.cacheManager.get(cacheKey);
 
     if (cachedStudents) {
       return cachedStudents;
     }
 
-    const students = await this.prisma.student.findMany();
-    await this.cacheManager.set('all-students', students, 600);
+    const students = await this.prisma.student.findMany({
+      where: {
+        teacherId: Number(teacherId),
+      },
+    });
+
+    await this.cacheManager.set(cacheKey, students, 600);
 
     return students;
   }
