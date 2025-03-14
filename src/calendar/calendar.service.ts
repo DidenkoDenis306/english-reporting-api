@@ -15,8 +15,6 @@ export class CalendarService {
     const startOfDay = moment.tz(startDate, timezone).startOf('day').toDate();
     const endOfDay = moment.tz(endDate, timezone).endOf('day').toDate();
 
-    console.log('hiddens', hiddenStudentIds);
-
     // TODO: add cashing
     const lessons = await this.prisma.lesson.findMany({
       where: {
