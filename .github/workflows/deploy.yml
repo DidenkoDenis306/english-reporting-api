@@ -1,0 +1,53 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} /bin/bash << 'EOF'
+          set -e
+          export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
+          REPO_DIR="/var/projects/english-reporting-api"
+
+          mkdir -p "$REPO_DIR"
+          cd "$REPO_DIR"
+
+          if [ ! -d .git ]; then
+            git clone --branch master --single-branch https://github.com/DidenkoDenis306/english-reporting-api.git .
+          else
+            git fetch origin master
+            git reset --hard origin/master
+            git clean -fd 
+          fi
+
+          cat > .env <<EOL
+          PORT=${{ secrets.PORT }}
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+          JWT_SECRET=${{ secrets.JWT_SECRET }}
+          POSTGRES_DB=${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
+          MAIN_APP_PORT=${{ secrets.MAIN_APP_PORT }}
+          MAIN_DEBUG_PORT=${{ secrets.MAIN_DEBUG_PORT }}
+          EOL
+          
+          docker-compose down --remove-orphans
+          docker-compose up -d --build
+          EOF
