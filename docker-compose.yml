@@ -55,7 +55,6 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - main
-      - client
     restart: always
     networks:
       - app-network
