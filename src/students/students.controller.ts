@@ -26,7 +26,12 @@ export class StudentsController {
 
   @Get(':id')
   getOne(@Param('id') id: number, @Query('filter') filter?: Filter) {
-    return this.studentsService.getStudent(id, filter);
+    return this.studentsService.getStudentById(id, filter);
+  }
+
+  @Get(':id/debt')
+  getDebt(@Param('id') id: number) {
+    return this.studentsService.getStudentDebt(id);
   }
 
   @Delete(':id')

@@ -8,7 +8,7 @@ export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get('profile')
-  @Auth()
+  // @Auth()
   getProfile(@CurrentUser('id') id: number) {
     return this.usersService.getById(id);
   }

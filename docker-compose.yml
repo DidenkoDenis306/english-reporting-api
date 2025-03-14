@@ -8,8 +8,6 @@ services:
       POSTGRES_DB: english-reporting
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123
-    ports:
-      - "5432:5432"
     volumes:
       - postgres:/var/lib/postgresql/data
     restart: always
@@ -37,7 +35,7 @@ services:
     ports:
       - "7654:7654"
       - "9229:9229"
-    command: sh -c "npx prisma db push && npm run start:dev"
+    command: sh -c "npx prisma migrate deploy &&  npm run start"
     depends_on:
       - postgres
       - redis
@@ -50,14 +48,16 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - main
+      - client
     restart: always
     networks:
       - app-network
-
 
 volumes:
   postgres:

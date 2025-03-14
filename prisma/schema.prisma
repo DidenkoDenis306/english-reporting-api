@@ -5,7 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:123@postgres:5432/english-reporting?connect_timeout=300"
+  url      = "postgresql://postgres:123@localhost:5433/english-reporting?connect_timeout=300"
 }
 
 model User {
@@ -33,8 +33,10 @@ model Lesson {
   updatedAt    DateTime  @updatedAt
   lessonNumber Int
   lessonContent String
+  payed Boolean @default(false)
   students     Student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
   users        User? @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
 
   @@map("lessons")
 }

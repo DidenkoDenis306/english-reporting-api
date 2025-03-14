@@ -8,6 +8,7 @@ import { LessonsModule } from './lessons/lessons.module';
 import { PrismaService } from './prisma.service';
 import { StudentsModule } from './students/students.module';
 import { UsersModule } from './users/users.module';
+import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { UsersModule } from './users/users.module';
     LessonsModule,
     UsersModule,
     AuthModule,
+    CalendarModule,
   ],
   controllers: [],
   providers: [PrismaService],
