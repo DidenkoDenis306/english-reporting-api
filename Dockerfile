@@ -1,5 +1,7 @@
 FROM node:20 AS build
 
+RUN apk --no-cache add openssl libc6-compat gcompat curl bash
+
 WORKDIR /app
 
 COPY package*.json ./
