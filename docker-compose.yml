@@ -1,13 +1,14 @@
 version: "3.0"
-
 services:
   postgres:
     container_name: postgres
     image: postgres:16
+    ports:
+      - "${POSTGRES_PORT}:5432"
     environment:
-      POSTGRES_DB: english-reporting
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: "${POSTGRES_DB}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     volumes:
       - postgres:/var/lib/postgresql/data
     restart: always
@@ -33,9 +34,9 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - "7654:7654"
-      - "9229:9229"
-    command: sh -c "npx prisma migrate deploy &&  npm run start"
+      - "${MAIN_APP_PORT}:7654"
+      - "${MAIN_DEBUG_PORT}:9229"
+    command: sh -c "npx prisma migrate deploy && npm run start"
     depends_on:
       - postgres
       - redis

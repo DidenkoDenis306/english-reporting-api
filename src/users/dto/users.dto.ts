@@ -1,13 +1,13 @@
 import { IsBoolean, IsString, MinLength } from 'class-validator';
 
 export class UserDto {
-  @MinLength(8, {
+  @MinLength(1, {
     message: 'First name must be at least 8 characters long',
   })
   @IsString()
   firstName: string;
 
-  @MinLength(8, {
+  @MinLength(1, {
     message: 'Last name must be at least 8 characters long',
   })
   @IsString()

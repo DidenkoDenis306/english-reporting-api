@@ -18,7 +18,7 @@ import { CalendarModule } from './calendar/calendar.module';
     CacheModule.register({
       isGlobal: true,
       store: redisStore,
-      host: 'localhost',
+      host: 'redis',
       port: 6379,
     }),
     StudentsModule,
