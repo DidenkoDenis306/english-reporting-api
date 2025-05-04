@@ -86,14 +86,17 @@ export class StudentsService {
 
   async deleteStudent(studentId: number) {
     const student = await this.prisma.student.findUnique({
-      where: { id: studentId },
+      where: { id: Number(studentId) },
     });
 
     if (student) {
       await this.prisma.student.delete({
-        where: { id: studentId },
+        where: { id: Number(studentId) },
       });
+
       await this.cacheManager.del(`student-${studentId}`);
+      // TODO: make dynamic
+      await this.cacheManager.del(`all-students-1`);
 
       return studentId;
     }
