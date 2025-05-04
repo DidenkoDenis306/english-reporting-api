@@ -7,7 +7,16 @@ async function start() {
 
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
+  app.enableCors({
+    origin: [
+      'http://english-reporting.com',
+      'https://english-reporting.com',
+      'https://english-reporting-client.vercel.app',
+    ],
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type, Authorization',
+    credentials: true,
+  });
 
   await app.listen(PORT, () => console.log(`Server started on ${PORT}`));
 }
